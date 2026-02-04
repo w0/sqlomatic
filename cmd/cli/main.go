@@ -28,6 +28,8 @@ func main() {
 	resolved := resolvePath(*datPath)
 	filename := filepath.Base(resolved)
 
+	dat := readFile(resolved)
+
 	dsn := fmt.Sprintf("file:%s.db?cached=shared", filename[:len(filename)-4])
 
 	log.Println(dsn)
@@ -44,7 +46,22 @@ func main() {
 		dataflies: &models.DatafileModel{DB: db},
 	}
 
-	log.Println(app)
+	err = app.dataflies.CreateDatabase()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, game := range dat.Game {
+		err = app.dataflies.InsertGame(game)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		err = app.dataflies.InsertRom(game.Rom, game.ID)
+		if err != nil {
+			log.Panicln(err)
+		}
+	}
 
 }
 
