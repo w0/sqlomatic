@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -13,6 +13,7 @@ import (
 )
 
 type application struct {
+	logger    *slog.Logger
 	dataflies *models.DatafileModel
 }
 
@@ -25,41 +26,54 @@ func main() {
 		os.Exit(1)
 	}
 
-	resolved := resolvePath(*datPath)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}))
+
+	resolved, err := resolvePath(*datPath)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	filename := filepath.Base(resolved)
 
-	dat := readFile(resolved)
+	dat, err := readFile(resolved)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
 	dsn := fmt.Sprintf("file:%s.db?cached=shared", filename[:len(filename)-4])
 
-	log.Println(dsn)
-
 	db, err := openDB(dsn)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
 	defer db.Close()
 
 	app := application{
+		logger:    logger,
 		dataflies: &models.DatafileModel{DB: db},
 	}
 
 	err = app.dataflies.CreateDatabase()
 	if err != nil {
-		log.Fatalln(err)
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 
 	for _, game := range dat.Game {
 		err = app.dataflies.InsertGame(game)
 		if err != nil {
-			log.Panicln(err)
+			logger.Warn(err.Error())
 		}
 
 		err = app.dataflies.InsertRom(game.Rom, game.ID)
 		if err != nil {
-			log.Panicln(err)
+			logger.Warn(err.Error())
 		}
 	}
 

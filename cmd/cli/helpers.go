@@ -9,30 +9,30 @@ import (
 	"github.com/sqlomatic/internal/models"
 )
 
-func resolvePath(datafile string) string {
+func resolvePath(datafile string) (string, error) {
 
 	abs, err := filepath.Abs(datafile)
 	if err != nil {
-		log.Fatalln(err.Error())
+		return "", err
 	}
 
 	info, err := os.Stat(abs)
 	if err != nil {
-		log.Fatalln(err.Error())
+		return "", err
 	}
 
 	if info.IsDir() {
 		log.Fatalln("error: path is a directory not a datafile.")
 	}
 
-	return abs
+	return abs, nil
 }
 
-func readFile(path string) models.Datafile {
+func readFile(path string) (models.Datafile, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatalln(err.Error())
+		return models.Datafile{}, err
 	}
 
 	var dat models.Datafile
@@ -42,9 +42,9 @@ func readFile(path string) models.Datafile {
 	err = decoder.Decode(&dat)
 
 	if err != nil {
-		log.Fatalln(err.Error())
+		return models.Datafile{}, err
 	}
 
-	return dat
+	return dat, nil
 
 }
