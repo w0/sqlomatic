@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sqlomatic/internal/models"
+	"github.com/w0/sqlomatic/internal/models"
 	_ "modernc.org/sqlite"
 )
 

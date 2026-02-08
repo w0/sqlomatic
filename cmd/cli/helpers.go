@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sqlomatic/internal/models"
+	"github.com/w0/sqlomatic/internal/models"
 )
 
 func resolvePath(datafile string) (string, error) {
