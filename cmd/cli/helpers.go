@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -16,13 +15,9 @@ func resolvePath(datafile string) (string, error) {
 		return "", err
 	}
 
-	info, err := os.Stat(abs)
+	_, err = os.Stat(abs)
 	if err != nil {
 		return "", err
-	}
-
-	if info.IsDir() {
-		log.Fatalln("error: path is a directory not a datafile.")
 	}
 
 	return abs, nil

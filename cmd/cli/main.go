@@ -18,18 +18,26 @@ type application struct {
 }
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}))
+
 	datPath := flag.String("datafile", "", "Path to the datafile to convert.")
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	dstPath := flag.String("dest", cwd, "Destination of created database.")
 	flag.Parse()
 
 	if *datPath == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
-
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level:     slog.LevelDebug,
-		AddSource: true,
-	}))
 
 	resolved, err := resolvePath(*datPath)
 	if err != nil {
@@ -44,7 +52,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	dsn := fmt.Sprintf("file:%s.db?cached=shared", filename[:len(filename)-4])
+	dst, err := resolvePath(*dstPath)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	dsn := fmt.Sprintf("file:%s/%s.db?cached=shared", dst, filename[:len(filename)-4])
 
 	db, err := openDB(dsn)
 	if err != nil {
