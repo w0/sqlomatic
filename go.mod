@@ -1,4 +1,4 @@
-module github.com/sqlomatic
+module github.com/w0/sqlomatic
 
 go 1.25.6
 
