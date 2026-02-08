@@ -62,7 +62,7 @@ func (m *DatafileModel) CreateDatabase() error {
 	}
 
 	gameTable := `CREATE TABLE IF NOT EXISTS games (
-	"id" INTEGER,
+	"id" INTEGER PRIMARY KEY,
 	"name" TEXT,
 	"cloneofid" INTEGER,
 	"description" TEXT);`
